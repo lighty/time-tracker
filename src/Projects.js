@@ -1,30 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useReducer } from "react";
 
-export default function Projects() {
-  const initialProjects = [
+const initialState = {
+  projects: [
     { name: 'reactの勉強' },
     { name: 'typescriptの勉強' },
-  ];
-  const [projects, setProjects] = useState(initialProjects);
-  const [message, setMessage] = useState('');
+  ],
+  message: '',
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'addProject':
+      return {
+        projects: state.projects.concat([{name: action.name}]),
+        message: `${action.name}を追加しました`,
+      };
+    case 'deleteProject':
+      return {
+        projects: state.projects.filter((p) => p.name !== action.name),
+        message: `${action.name}を削除しました`,
+      };
+    default:
+      throw new Error();
+  }
+}
+
+export default function Projects() {
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const handleAddProject = (name) => {
-    setProjects(projects.concat([{name: name}]));
-    setMessage(`${name}を追加しました`);
+    dispatch({type: 'addProject', name: name})
   }
   const handleDeleteProject = (name) => {
-    setProjects(projects.filter((p) => p.name !== name));
-    setMessage(`${name}を削除しました`);
+    dispatch({type: 'deleteProject', name: name})
   }
 
-  const project_components = projects.map((project) => {
+  const project_components = state.projects.map((project) => {
     return <li key={project.name}>{project.name} <DeleteForm onClick={handleDeleteProject} name={project.name}/></li>;
   });
 
   return (
     <div>
       <h2>Projects</h2>
-      <p>{message}</p>
+      <p>{state.message}</p>
       <div><AddForm onSubmit={handleAddProject}/></div>
       <ul>{project_components}</ul>
     </div>
