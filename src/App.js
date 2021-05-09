@@ -6,6 +6,7 @@ import {
   Link
 } from "react-router-dom";
 import Projects from "./Projects"
+import Tasks from "./Tasks"
 
 export default function App() {
   return (
@@ -44,8 +45,3 @@ export default function App() {
 function Entries() {
   return <h2>Home</h2>;
 }
-
-function Tasks() {
-  return <h2>About</h2>;
-}
-
