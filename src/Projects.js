@@ -1,6 +1,6 @@
 import React, { useState, useReducer } from "react";
 
-const initialState = {
+const initialProjectState = {
   projects: [
     { name: 'reactの勉強' },
     { name: 'typescriptの勉強' },
@@ -8,16 +8,29 @@ const initialState = {
   message: '',
 };
 
-function reducer(state, action) {
+const init = (initialArg) => {
+  const projects = localStorage.getItem('projects')
+  if (projects) {
+    return { projects: JSON.parse(projects), message: '' };
+  } else {
+    return initialArg;
+  }
+}
+
+const reducer = (state, action) => {
   switch (action.type) {
     case 'addProject':
+      const newProject = state.projects.concat([{name: action.name}]);
+      localStorage.setItem('projects', JSON.stringify(newProject));
       return {
-        projects: state.projects.concat([{name: action.name}]),
+        projects: newProject,
         message: `${action.name}を追加しました`,
       };
     case 'deleteProject':
+      const newProject2 = state.projects.filter((p) => p.name !== action.name);
+      localStorage.setItem('projects', JSON.stringify(newProject2));
       return {
-        projects: state.projects.filter((p) => p.name !== action.name),
+        projects: newProject2,
         message: `${action.name}を削除しました`,
       };
     default:
@@ -26,7 +39,7 @@ function reducer(state, action) {
 }
 
 export default function Projects() {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, initialProjectState, init);
 
   const handleAddProject = (name) => {
     dispatch({type: 'addProject', name: name})
@@ -49,7 +62,7 @@ export default function Projects() {
   );
 }
 
-function AddForm(props){
+const AddForm = (props) => {
   const [value, setValue] = useState('')
 
   const handleChange = (event) => setValue(event.target.value);
@@ -67,7 +80,7 @@ function AddForm(props){
   );
 }
 
-function DeleteForm(props) {
+const DeleteForm = (props) => {
   const handleClick = (event) => {
     event.preventDefault();
     props.onClick(props.name);
