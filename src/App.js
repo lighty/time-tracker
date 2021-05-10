@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import Projects from "./Projects"
 import Tasks from "./Tasks"
+import Entries from "./Entries"
 
 export default function App() {
   return (
@@ -40,8 +41,4 @@ export default function App() {
       </div>
     </Router>
   );
-}
-
-function Entries() {
-  return <h2>Home</h2>;
 }
