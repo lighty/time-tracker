@@ -28,17 +28,17 @@ const reducer = (state, action) => {
     case 'addEntry':
       const newEntries = state.entries.concat([
         {
-          name: action.name,
+          name: action.taskName,
           projectName: action.projectName,
           isTracking: true,
-          startAt: Date(),
+          startAt: dayjs().valueOf(),
           stopAt: null,
         }
       ]);
       localStorage.setItem('entries', JSON.stringify(newEntries));
       return {
         entries: newEntries,
-        message: `${action.name}の計測を開始しました`,
+        message: `【${action.taskName}】の計測を開始しました`,
       }
     default:
       throw new Error();
@@ -50,11 +50,11 @@ const Entries = () => {
   const addEntry = (task) => {
     dispatch({type: 'addEntry', taskName: task.name, projectName: task.projectName});
   };
-  const entries = state.entries.map(e => <li><Entry entry={e}/></li>);
+  const entries = state.entries.map(e => <li key={e.taskName}><Entry entry={e} /></li>);
   return (
     <div>
       <h2>Entries</h2>
-      <p>state.message</p>
+      <p>{state.message}</p>
       <div><AddForm onSubmit={addEntry}/></div>
       <ul>{entries}</ul>
     </div>
@@ -65,8 +65,21 @@ const Entry = (props) => {
   const entry = props.entry;
 
   const startAt = dayjs(entry.startAt).format('HH:mm:ss');
-  const stopAt = dayjs(entry.stopAt).format('HH:mm:ss');
-  const elapseTime = dayjs((entry.stopAt - entry.startAt) - (9 * 60 * 60 * 1000)).format('HH:mm:ss')
+  const stopAt = entry.isTracking ? '' : dayjs(entry.stopAt).format('HH:mm:ss');
+
+  const diffFrom = (from) => {
+    return dayjs((from - entry.startAt) - (9 * 60 * 60 * 1000)).format('HH:mm:ss');
+  };
+  let initialState;
+  if (entry.isTracking) {
+    initialState = diffFrom(dayjs().valueOf());
+    setInterval(() => {
+      setElapseTime(diffFrom(dayjs().valueOf()));
+    }, 1000);
+  } else {
+    initialState = diffFrom(entry.stopAt);
+  }
+  const [elapseTime, setElapseTime] = useState(initialState);
 
   return (
     <div>
