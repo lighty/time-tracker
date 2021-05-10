@@ -1,4 +1,5 @@
 import React, { useState, useReducer } from "react";
+import dayjs from 'dayjs'
 
 const initState = {
   entries: [
@@ -63,27 +64,14 @@ const Entries = () => {
 const Entry = (props) => {
   const entry = props.entry;
 
-  let startAtDate = new Date();
-  startAtDate.setTime(entry.startAt);
-  const startAt = `${startAtDate.getHours()}:${startAtDate.getMinutes()}:${startAtDate.getSeconds()}`
-
-  let stopAtDate = new Date();
-  stopAtDate.setTime(entry.stopAt);
-  const stopAt = `${stopAtDate.getHours()}:${stopAtDate.getMinutes()}:${stopAtDate.getSeconds()}`
-
-  const elapseTime = parseInt((entry.stopAt / 1000) - (entry.startAt / 1000));
-	let hour = parseInt(elapseTime / 3600);
-	let min = parseInt((elapseTime / 60) % 60);
-	let sec = elapseTime % 60;
-	if(hour < 10) { hour = "0" + hour; }
-	if(min < 10) { min = "0" + min; }
-	if(sec < 10) { sec = "0" + sec; }
-  const elapseTimeString = `${hour}:${min}:${sec}`
+  const startAt = dayjs(entry.startAt).format('HH:mm:ss');
+  const stopAt = dayjs(entry.stopAt).format('HH:mm:ss');
+  const elapseTime = dayjs((entry.stopAt - entry.startAt) - (9 * 60 * 60 * 1000)).format('HH:mm:ss')
 
   return (
     <div>
       <p>{entry.name} [{entry.projectName}]</p>
-      <p>{startAt} - {stopAt} ({elapseTimeString})</p>
+      <p>{startAt} - {stopAt} ({elapseTime})</p>
     </div>
   );
 }
