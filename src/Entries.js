@@ -1,10 +1,10 @@
-import React, { useState, useReducer } from "react";
+import React, { useState, useReducer, useEffect } from "react";
 import dayjs from 'dayjs'
 
 const initState = {
   entries: [
     {
-      name: 'Entriesページの開発',
+      taskName: 'Entriesページの開発',
       projectName: 'Time Trackerの開発',
       isTracking: false,
       startAt: 1620652335350,
@@ -28,7 +28,7 @@ const reducer = (state, action) => {
     case 'addEntry':
       const newEntries = state.entries.concat([
         {
-          name: action.taskName,
+          taskName: action.taskName,
           projectName: action.projectName,
           isTracking: true,
           startAt: dayjs().valueOf(),
@@ -40,6 +40,17 @@ const reducer = (state, action) => {
         entries: newEntries,
         message: `【${action.taskName}】の計測を開始しました`,
       }
+    case 'stopTimer':
+      const entry = state.entries.find(e => e.taskName === action.taskName);
+      entry.stopAt = action.stopAt;
+      entry.isTracking = false;
+      const newEntries2 = state.entries.filter(e => e.taskName !== action.taskName).concat(entry)
+
+      localStorage.setItem('entries', JSON.stringify(newEntries2));
+      return {
+        entries: newEntries2,
+        message: `【${action.taskName}】の計測を停止しました`,
+      }
     default:
       throw new Error();
   }
@@ -50,7 +61,10 @@ const Entries = () => {
   const addEntry = (task) => {
     dispatch({type: 'addEntry', taskName: task.name, projectName: task.projectName});
   };
-  const entries = state.entries.map(e => <li key={e.taskName}><Entry entry={e} /></li>);
+  const stopTimer = (taskName, stopAt) => {
+    dispatch({type: 'stopTimer', taskName, stopAt});
+  };
+  const entries = state.entries.map(e => <li key={e.taskName}><Entry entry={e} onTimerStop={stopTimer}/></li>);
   return (
     <div>
       <h2>Entries</h2>
@@ -70,21 +84,27 @@ const Entry = (props) => {
   const diffFrom = (from) => {
     return dayjs((from - entry.startAt) - (9 * 60 * 60 * 1000)).format('HH:mm:ss');
   };
-  let initialState;
-  if (entry.isTracking) {
-    initialState = diffFrom(dayjs().valueOf());
-    setInterval(() => {
-      setElapseTime(diffFrom(dayjs().valueOf()));
-    }, 1000);
-  } else {
-    initialState = diffFrom(entry.stopAt);
-  }
+
+  const initialState = entry.isTracking ? diffFrom(dayjs().valueOf()) : diffFrom(entry.stopAt);
   const [elapseTime, setElapseTime] = useState(initialState);
+
+  useEffect(() => {
+    if (entry.isTracking) {
+      const timer = setInterval(() => {
+        setElapseTime(diffFrom(dayjs().valueOf()));
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  });
+
+  const handleTimerStop = () => props.onTimerStop(entry.taskName, dayjs().valueOf());
 
   return (
     <div>
-      <p>{entry.name} [{entry.projectName}]</p>
+      <p>{entry.taskName} [{entry.projectName}]</p>
       <p>{startAt} - {stopAt} ({elapseTime})</p>
+      { entry.isTracking && <button onClick={handleTimerStop}>停止</button> }
     </div>
   );
 }
