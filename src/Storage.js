@@ -1,9 +1,26 @@
-export const saveEntries = (entiries) => {
-  localStorage.setItem('entiries', JSON.stringify(entiries));
+export const saveEntries = (entries) => {
+  const modEntries = entries.map(e => {
+    return { id: e.id, taskId: e.task.id, isTracking: e.isTracking, startAt: e.startAt, stopAt: e.stopAt };
+  });
+  localStorage.setItem('entries', JSON.stringify(modEntries));
 };
 
 export const loadEntries = () => {
-  return JSON.parse(localStorage.getItem('entiries'));
+  const tasks = loadTasks();
+  const projects = loadProjects();
+  const entries = JSON.parse(localStorage.getItem('entries'));
+
+  if(entries) {
+    return entries.map(e => {
+      const id = e.id;
+      const task = tasks.find(t => t.id === e.taskId);
+      const project = projects.find(p => p.id === task.projectId);
+      const isTracking = e.isTracking;
+      const startAt = e.startAt;
+      const stopAt = e.stopAt;
+      return { id, task, project, isTracking, startAt, stopAt };
+    });
+  }
 };
 
 export const saveTasks = (tasks) => {
@@ -15,7 +32,7 @@ export const saveTasks = (tasks) => {
 
 export const loadTasks = () => {
   const tasks = JSON.parse(localStorage.getItem('tasks'));
-  const projects = JSON.parse(localStorage.getItem('projects'));
+  const projects = loadProjects();
   if (tasks) {
     return tasks.map(t => {
       return {

@@ -1,24 +1,17 @@
 import React, { useState, useReducer, useEffect } from "react";
-import dayjs from 'dayjs';
+import numbering from './Numbering';
 import { loadTasks, saveEntries, loadEntries } from './Storage';
+import dayjs from 'dayjs';
 
 const initState = {
-  entries: [
-    {
-      taskName: 'Entriesページの開発',
-      projectName: 'Time Trackerの開発',
-      isTracking: false,
-      startAt: 1620652335350,
-      stopAt:  1620652345350,
-    }
-  ],
+  entries: [],
   messsage: '',
 };
 
 const init = (initialArg) => {
   const entries = loadEntries();
   if (entries) {
-    return { entries: JSON.parse(entries), message: '' };
+    return { entries, message: '' };
   } else {
     return initialArg;
   }
@@ -29,8 +22,9 @@ const reducer = (state, action) => {
     case 'addEntry': {
       const newEntries = state.entries.concat([
         {
-          taskName: action.taskName,
-          projectName: action.projectName,
+          id: numbering(state.entries),
+          task: action.task,
+          project: action.task.project,
           isTracking: true,
           startAt: dayjs().valueOf(),
           stopAt: null,
@@ -39,19 +33,19 @@ const reducer = (state, action) => {
       saveEntries(newEntries);
       return {
         entries: newEntries,
-        message: `【${action.taskName}】の計測を開始しました`,
+        message: `【${action.task.name}】の計測を開始しました`,
       }
     }
     case 'stopTimer': {
-      const entry = state.entries.find(e => e.taskName === action.taskName);
+      const entry = state.entries.find(e => e.id === action.entry.id);
       entry.stopAt = action.stopAt;
       entry.isTracking = false;
-      const newEntries = state.entries.filter(e => e.taskName !== action.taskName).concat(entry)
+      const newEntries = state.entries.filter(e => e.id !== action.entry.id).concat(entry)
 
       saveEntries(newEntries);
       return {
         entries: newEntries,
-        message: `【${action.taskName}】の計測を停止しました`,
+        message: `【${action.entry.task.name}】の計測を停止しました`,
       }
     }
     default:
@@ -62,12 +56,12 @@ const reducer = (state, action) => {
 const Entries = () => {
   const [state, dispatch] = useReducer(reducer, initState, init);
   const addEntry = (task) => {
-    dispatch({type: 'addEntry', taskName: task.name, projectName: task.projectName});
+    dispatch({type: 'addEntry', task});
   };
-  const stopTimer = (taskName, stopAt) => {
-    dispatch({type: 'stopTimer', taskName, stopAt});
+  const stopTimer = (entry, stopAt) => {
+    dispatch({type: 'stopTimer', entry, stopAt});
   };
-  const entries = state.entries.map(e => <li key={e.taskName}><Entry entry={e} onTimerStop={stopTimer}/></li>);
+  const entries = state.entries.map(e => <li key={e.id}><Entry entry={e} onTimerStop={stopTimer} key={e.id}/></li>);
   return (
     <div>
       <h2>Entries</h2>
@@ -101,11 +95,11 @@ const Entry = (props) => {
     }
   });
 
-  const handleTimerStop = () => props.onTimerStop(entry.taskName, dayjs().valueOf());
+  const handleTimerStop = () => props.onTimerStop(entry, dayjs().valueOf());
 
   return (
     <div>
-      <p>{entry.taskName} [{entry.projectName}]</p>
+      <p>{entry.task.name} [{entry.task.project.name}]</p>
       <p>{startAt} - {stopAt} ({elapseTime})</p>
       { entry.isTracking && <button onClick={handleTimerStop}>停止</button> }
     </div>
@@ -114,21 +108,21 @@ const Entry = (props) => {
 
 const AddForm = (props) => {
   const tasks = loadTasks();
-  const [taskName, setTaskName] = useState(tasks[0].name);
+  const [task, setTask] = useState(tasks[0]);
   const taskOptions = tasks.map(task => {
-    return <option value={task.name} key={task.name}>{task.name} [{task.project.name}]</option>;
+    return <option value={task.id} key={task.id}>{task.name} [{task.project.name}]</option>;
   });
 
-  const handleTaskNameChange = e => setTaskName(e.target.value);
+  const handleTaskChange = e => setTask(tasks.find(t => t.id === parseInt(e.target.value)));
   const handleSubmit = e => {
     e.preventDefault();
-    props.onSubmit(tasks.find(t => t.name === taskName));
-    setTaskName(tasks[0].name);
+    props.onSubmit(task);
+    setTask(tasks[0].name);
   }
 
   return (
     <form onSubmit={handleSubmit}>
-      <select onChange={handleTaskNameChange} value={taskName}>
+      <select onChange={handleTaskChange} value={task.id}>
         {taskOptions} 
       </select>
       <input type='submit' value='計測開始' />
