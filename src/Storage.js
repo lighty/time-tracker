@@ -7,18 +7,16 @@ export const saveEntries = (entries) => {
 
 export const loadEntries = () => {
   const tasks = loadTasks();
-  const projects = loadProjects();
   const entries = JSON.parse(localStorage.getItem('entries'));
 
   if(entries) {
     return entries.map(e => {
       const id = e.id;
       const task = tasks.find(t => t.id === e.taskId);
-      const project = projects.find(p => p.id === task.projectId);
       const isTracking = e.isTracking;
       const startAt = e.startAt;
       const stopAt = e.stopAt;
-      return { id, task, project, isTracking, startAt, stopAt };
+      return { id, task, isTracking, startAt, stopAt };
     });
   }
 };

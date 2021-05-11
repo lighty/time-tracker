@@ -24,7 +24,6 @@ const reducer = (state, action) => {
         {
           id: numbering(state.entries),
           task: action.task,
-          project: action.task.project,
           isTracking: true,
           startAt: dayjs().valueOf(),
           stopAt: null,
@@ -61,13 +60,14 @@ const Entries = () => {
   const stopTimer = (entry, stopAt) => {
     dispatch({type: 'stopTimer', entry, stopAt});
   };
-  const entries = state.entries.map(e => <li key={e.id}><Entry entry={e} onTimerStop={stopTimer} key={e.id}/></li>);
+  const entryList = state.entries.map(e => <li key={e.id}><Entry entry={e} onTimerStop={stopTimer} key={e.id}/></li>);
+  const notTracking = state.entries.every(e => !e.isTracking);
   return (
     <div>
       <h2>Entries</h2>
       <p>{state.message}</p>
-      <div><AddForm onSubmit={addEntry}/></div>
-      <ul>{entries}</ul>
+      <div>{ notTracking && <AddForm onSubmit={addEntry}/> }</div>
+      <ul>{entryList}</ul>
     </div>
   );
 }
@@ -117,7 +117,7 @@ const AddForm = (props) => {
   const handleSubmit = e => {
     e.preventDefault();
     props.onSubmit(task);
-    setTask(tasks[0].name);
+    setTask(tasks[0]);
   }
 
   return (
