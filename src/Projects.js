@@ -1,5 +1,6 @@
 import React, { useState, useReducer } from "react";
 import numbering from './Numbering';
+import { saveProjects, loadProjects } from './Storage';
 
 const initialProjectState = {
   projects: [
@@ -10,9 +11,9 @@ const initialProjectState = {
 };
 
 const init = (initialArg) => {
-  const projects = localStorage.getItem('projects')
+  const projects = loadProjects();
   if (projects) {
-    return { projects: JSON.parse(projects), message: '' };
+    return { projects: projects, message: '' };
   } else {
     return initialArg;
   }
@@ -20,20 +21,22 @@ const init = (initialArg) => {
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case 'addProject':
+    case 'addProject': {
       const newProject = state.projects.concat([{id: numbering(state.projects), name: action.name}]);
-      localStorage.setItem('projects', JSON.stringify(newProject));
+      saveProjects(newProject);
       return {
         projects: newProject,
         message: `${action.name}を追加しました`,
       };
-    case 'deleteProject':
-      const newProject2 = state.projects.filter((p) => p.id !== action.id);
-      localStorage.setItem('projects', JSON.stringify(newProject2));
+    }
+    case 'deleteProject': {
+      const newProject = state.projects.filter((p) => p.id !== action.id);
+      saveProjects(newProject);
       return {
-        projects: newProject2,
+        projects: newProject,
         message: `${action.name}を削除しました`,
       };
+    }
     default:
       throw new Error();
   }

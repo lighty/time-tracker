@@ -1,30 +1,10 @@
 import React, { useState, useReducer } from "react";
 import numbering from './Numbering';
+import { saveTasks, loadTasks, loadProjects } from './Storage';
 
 const initTaskState = {
   tasks: [],
   messsage: '',
-};
-
-const saveTasks = (tasks) => {
-  const modTasks = tasks.map(t => {
-    return { id: t.id, name: t.name, projectId: t.project.id };
-  });
-  localStorage.setItem('tasks', JSON.stringify(modTasks));
-};
-
-const loadTasks = () => {
-  const tasks = JSON.parse(localStorage.getItem('tasks'));
-  const projects = JSON.parse(localStorage.getItem('projects'));
-  if (tasks) {
-    return tasks.map(t => {
-      return {
-        id: t.id,
-        name: t.name,
-        project: projects.find(p => p.id === t.projectId),
-      };
-    });
-  }
 };
 
 const init = (initialArg) => {
@@ -87,7 +67,7 @@ const Tasks = () => {
 
 const AddForm = (props) => {
   const [name, setName] = useState('');
-  const projects = JSON.parse(localStorage.getItem('projects'));
+  const projects = loadProjects();
   const [project, setProject] = useState(projects[0]);
   const projectOptions = projects.map(project => {
     return <option value={project.id} key={project.id}>{project.name}</option>;
