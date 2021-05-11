@@ -68,7 +68,7 @@ const Entries = () => {
   const stopTimer = (entry, stopAt) => dispatch({type: 'stopTimer', entry, stopAt});
   const deleteEntry = entry => dispatch({type: 'deleteEntry', entry});
 
-  const entryList = state.entries.map(e => (
+  const entryList = state.entries.sort((a, b) => b.id - a.id).map(e => (
     <li key={e.id}>
       <Entry entry={e} onTimerStop={stopTimer} onDelete={deleteEntry} key={e.id}/>
     </li>
