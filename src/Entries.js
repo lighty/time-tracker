@@ -35,6 +35,15 @@ const reducer = (state, action) => {
         message: `【${action.task.name}】の計測を開始しました`,
       }
     }
+    case 'deleteEntry': {
+      const newEntries = state.entries.filter(e => e.id !== action.entry.id);
+      saveEntries(newEntries);
+      const startAt = dayjs(action.entry.startAt).format('HH:mm:ss');
+      return {
+        entries: newEntries,
+        message: `${action.entry.task.name} ${startAt} - を削除しました`,
+      }
+    }
     case 'stopTimer': {
       const entry = state.entries.find(e => e.id === action.entry.id);
       entry.stopAt = action.stopAt;
@@ -54,13 +63,16 @@ const reducer = (state, action) => {
 
 const Entries = () => {
   const [state, dispatch] = useReducer(reducer, initState, init);
-  const addEntry = (task) => {
-    dispatch({type: 'addEntry', task});
-  };
-  const stopTimer = (entry, stopAt) => {
-    dispatch({type: 'stopTimer', entry, stopAt});
-  };
-  const entryList = state.entries.map(e => <li key={e.id}><Entry entry={e} onTimerStop={stopTimer} key={e.id}/></li>);
+
+  const addEntry = task => dispatch({ type: 'addEntry', task });
+  const stopTimer = (entry, stopAt) => dispatch({type: 'stopTimer', entry, stopAt});
+  const deleteEntry = entry => dispatch({type: 'deleteEntry', entry});
+
+  const entryList = state.entries.map(e => (
+    <li key={e.id}>
+      <Entry entry={e} onTimerStop={stopTimer} onDelete={deleteEntry} key={e.id}/>
+    </li>
+  ));
   const notTracking = state.entries.every(e => !e.isTracking);
   return (
     <div>
@@ -96,14 +108,24 @@ const Entry = (props) => {
   });
 
   const handleTimerStop = () => props.onTimerStop(entry, dayjs().valueOf());
+  const handleDelete = () => props.onDelete(entry);
 
   return (
     <div>
       <p>{entry.task.name} [{entry.task.project.name}]</p>
       <p>{startAt} - {stopAt} ({elapseTime})</p>
       { entry.isTracking && <button onClick={handleTimerStop}>停止</button> }
+      <DeleteForm onClick={handleDelete}/>
     </div>
   );
+}
+
+const DeleteForm = (props) => {
+  const handleClick = (event) => {
+    event.preventDefault();
+    props.onClick(props.entry);
+  }
+  return <button onClick={handleClick}>削除</button>;
 }
 
 const AddForm = (props) => {
