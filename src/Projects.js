@@ -1,9 +1,10 @@
 import React, { useState, useReducer } from "react";
+import numbering from './Numbering';
 
 const initialProjectState = {
   projects: [
-    { name: 'reactの勉強' },
-    { name: 'typescriptの勉強' },
+    { id: 1, name: 'reactの勉強' },
+    { id: 2, name: 'typescriptの勉強' },
   ],
   message: '',
 };
@@ -20,14 +21,14 @@ const init = (initialArg) => {
 const reducer = (state, action) => {
   switch (action.type) {
     case 'addProject':
-      const newProject = state.projects.concat([{name: action.name}]);
+      const newProject = state.projects.concat([{id: numbering(state.projects), name: action.name}]);
       localStorage.setItem('projects', JSON.stringify(newProject));
       return {
         projects: newProject,
         message: `${action.name}を追加しました`,
       };
     case 'deleteProject':
-      const newProject2 = state.projects.filter((p) => p.name !== action.name);
+      const newProject2 = state.projects.filter((p) => p.id !== action.id);
       localStorage.setItem('projects', JSON.stringify(newProject2));
       return {
         projects: newProject2,
@@ -42,14 +43,14 @@ export default function Projects() {
   const [state, dispatch] = useReducer(reducer, initialProjectState, init);
 
   const handleAddProject = (name) => {
-    dispatch({type: 'addProject', name: name})
+    dispatch({type: 'addProject', name})
   }
-  const handleDeleteProject = (name) => {
-    dispatch({type: 'deleteProject', name: name})
+  const handleDeleteProject = (id, name) => {
+    dispatch({type: 'deleteProject', id, name})
   }
 
   const project_components = state.projects.map((project) => {
-    return <li key={project.name}>{project.name} <DeleteForm onClick={handleDeleteProject} name={project.name}/></li>;
+    return <li key={project.name}>{project.name} <DeleteForm onClick={handleDeleteProject} project={project}/></li>;
   });
 
   return (
@@ -83,7 +84,7 @@ const AddForm = (props) => {
 const DeleteForm = (props) => {
   const handleClick = (event) => {
     event.preventDefault();
-    props.onClick(props.name);
+    props.onClick(props.project.id, props.project.name);
   }
 
   return <button onClick={handleClick}>削除</button>;
