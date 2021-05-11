@@ -1,3 +1,11 @@
+export const saveEntries = (entiries) => {
+  localStorage.setItem('entiries', JSON.stringify(entiries));
+};
+
+export const loadEntries = () => {
+  return JSON.parse(localStorage.getItem('entiries'));
+};
+
 export const saveTasks = (tasks) => {
   const modTasks = tasks.map(t => {
     return { id: t.id, name: t.name, projectId: t.project.id };

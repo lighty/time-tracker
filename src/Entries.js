@@ -1,5 +1,6 @@
 import React, { useState, useReducer, useEffect } from "react";
-import dayjs from 'dayjs'
+import dayjs from 'dayjs';
+import { loadTasks, saveEntries, loadEntries } from './Storage';
 
 const initState = {
   entries: [
@@ -15,7 +16,7 @@ const initState = {
 };
 
 const init = (initialArg) => {
-  const entries = localStorage.getItem('entries')
+  const entries = loadEntries();
   if (entries) {
     return { entries: JSON.parse(entries), message: '' };
   } else {
@@ -25,7 +26,7 @@ const init = (initialArg) => {
 
 const reducer = (state, action) => {
   switch(action.type) {
-    case 'addEntry':
+    case 'addEntry': {
       const newEntries = state.entries.concat([
         {
           taskName: action.taskName,
@@ -35,22 +36,24 @@ const reducer = (state, action) => {
           stopAt: null,
         }
       ]);
-      localStorage.setItem('entries', JSON.stringify(newEntries));
+      saveEntries(newEntries);
       return {
         entries: newEntries,
         message: `【${action.taskName}】の計測を開始しました`,
       }
-    case 'stopTimer':
+    }
+    case 'stopTimer': {
       const entry = state.entries.find(e => e.taskName === action.taskName);
       entry.stopAt = action.stopAt;
       entry.isTracking = false;
-      const newEntries2 = state.entries.filter(e => e.taskName !== action.taskName).concat(entry)
+      const newEntries = state.entries.filter(e => e.taskName !== action.taskName).concat(entry)
 
-      localStorage.setItem('entries', JSON.stringify(newEntries2));
+      saveEntries(newEntries);
       return {
-        entries: newEntries2,
+        entries: newEntries,
         message: `【${action.taskName}】の計測を停止しました`,
       }
+    }
     default:
       throw new Error();
   }
@@ -110,10 +113,10 @@ const Entry = (props) => {
 }
 
 const AddForm = (props) => {
-  const tasks = JSON.parse(localStorage.getItem('tasks'));
+  const tasks = loadTasks();
   const [taskName, setTaskName] = useState(tasks[0].name);
   const taskOptions = tasks.map(task => {
-    return <option value={task.name} key={task.name}>{task.name} [{task.projectName}]</option>;
+    return <option value={task.name} key={task.name}>{task.name} [{task.project.name}]</option>;
   });
 
   const handleTaskNameChange = e => setTaskName(e.target.value);
