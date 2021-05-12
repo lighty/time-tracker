@@ -9,7 +9,7 @@ import Projects from "./Projects"
 import Tasks from "./Tasks"
 import Entries from "./Entries"
 
-export default function App() {
+const App: React.FC = () => {
   return (
     <Router>
       <div>
@@ -44,4 +44,6 @@ export default function App() {
       </div>
     </Router>
   );
-}
+};
+
+export default  App;
