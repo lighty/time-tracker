@@ -3,18 +3,9 @@ import numbering from './Numbering';
 import { loadTasks, saveEntries, loadEntries } from './Storage';
 import dayjs from 'dayjs';
 
-const initState = {
-  entries: [],
-  messsage: '',
-};
-
-const init = (initialArg) => {
+const init = () => {
   const entries = loadEntries();
-  if (entries) {
-    return { entries, message: '' };
-  } else {
-    return initialArg;
-  }
+  return { entries, message: '' };
 };
 
 const reducer = (state, action) => {
@@ -62,7 +53,7 @@ const reducer = (state, action) => {
 }
 
 const Entries = () => {
-  const [state, dispatch] = useReducer(reducer, initState, init);
+  const [state, dispatch] = useReducer(reducer, null, init);
 
   const addEntry = task => dispatch({ type: 'addEntry', task });
   const stopTimer = (entry, stopAt) => dispatch({type: 'stopTimer', entry, stopAt});

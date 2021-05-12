@@ -2,19 +2,8 @@ import React, { useState, useReducer } from "react";
 import numbering from './Numbering';
 import { saveTasks, loadTasks, loadProjects } from './Storage';
 
-const initTaskState = {
-  tasks: [],
-  messsage: '',
-};
-
-const init = (initialArg) => {
-  const tasks = loadTasks();
-  if (tasks) {
-    // projectはlocalStorageに入れるときはidで、取り出したときはnameにする
-    return { tasks: tasks, message: '' };
-  } else {
-    return initialArg;
-  }
+const init = () => {
+  return { tasks: loadTasks(), message: '' };
 }
 
 const reducer = (state, action) => {
@@ -41,7 +30,7 @@ const reducer = (state, action) => {
 }
 
 const Tasks = () => {
-  const [state, dispatch] = useReducer(reducer, initTaskState, init);
+  const [state, dispatch] = useReducer(reducer, null, init);
   const deleteTask = (id, name) => {
     dispatch({type: 'deleteTask', id, name});
   };

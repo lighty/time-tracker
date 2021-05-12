@@ -1,13 +1,8 @@
 import React, { useState, useReducer } from "react";
 import numbering from './Numbering';
-import { saveProjects, loadProjects } from './Storage';
+import { saveProjects, loadProjects, project } from './Storage';
 
-interface project {
-  id: number,
-  name: string,
-}
-
-interface projectState {
+export interface projectState {
   projects: project[];
   message: string;
 }
@@ -22,7 +17,7 @@ const initialProjectState: projectState = {
 
 const init = (initialArg: projectState): projectState => {
   const projects = loadProjects();
-  if (projects) {
+  if (projects.length > 0) {
     return { projects: projects, message: '' };
   } else {
     return initialArg;
