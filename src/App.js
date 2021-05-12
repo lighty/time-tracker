@@ -28,13 +28,16 @@ export default function App() {
         </nav>
 
         <Switch>
-          <Route path="/entries">
+          <Route path="/" exact>
             <Entries />
           </Route>
-          <Route path="/tasks">
+          <Route path="/entries" exact>
+            <Entries />
+          </Route>
+          <Route path="/tasks" exact>
             <Tasks />
           </Route>
-          <Route path="/projects">
+          <Route path="/projects" exact>
             <Projects />
           </Route>
         </Switch>
