@@ -8,6 +8,9 @@ import {
 import Projects from "./Projects"
 import Tasks from "./Tasks"
 import Entries from "./Entries"
+import {
+  Grid
+} from '@material-ui/core';
 
 const App: React.FC = () => {
   return (

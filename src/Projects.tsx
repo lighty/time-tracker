@@ -1,6 +1,14 @@
 import React, { useReducer, useState } from "react";
 import numbering from './Numbering';
 import { loadProjects, project, saveProjects } from './Storage';
+import DeleteIcon from '@material-ui/icons/Delete';
+import {
+  Button,
+  IconButton,
+  Grid,
+  TextField,
+} from '@material-ui/core';
+import {  } from "@material-ui/core";
 
 export interface projectState {
   projects: project[];
@@ -57,17 +65,31 @@ export default function Projects(): JSX.Element {
     dispatch({ type: 'deleteProject', id, name })
   }
 
-  const project_components = state.projects.map((project) => {
-    return <li key={project.name}>{project.name} <DeleteForm onClick={handleDeleteProject} project={project} /></li>;
-  });
-
   return (
     <div>
       <h2>Projects</h2>
       <p>{state.message}</p>
       <div><AddForm onSubmit={handleAddProject} /></div>
-      <ul>{project_components}</ul>
-    </div>
+        {
+          state.projects.map((project) => (
+            <div key={project.name}>
+              <Grid
+                container
+                direction="row"
+                justify="flex-start"
+                alignItems="baseline"
+              >
+                <Grid item xs={2}>
+                  {project.name}
+                </Grid>
+                <Grid item xs={1}>
+                  <DeleteForm onClick={handleDeleteProject} project={project} />
+                </Grid>
+              </Grid>
+            </div>
+          ))
+        }
+    </div >
   );
 }
 
@@ -83,8 +105,19 @@ const AddForm: React.FC<{ onSubmit: Function }> = (props) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input type='text' value={value} onChange={handleChange} />
-      <input type='submit' value='追加' />
+      <Grid
+        container
+        direction="row"
+        justify="flex-start"
+        alignItems="baseline"
+      >
+        <Grid item xs={2}>
+          <TextField type='text' value={value} onChange={handleChange} />
+        </Grid>
+        <Grid item xs={1}>
+          <Button variant="contained" color="primary" type='submit' value='追加'>追加</Button>
+        </Grid>
+      </Grid>
     </form>
   );
 }
@@ -95,5 +128,5 @@ const DeleteForm: React.FC<{ onClick: Function, project: project }> = (props) =>
     props.onClick(props.project.id, props.project.name);
   }
 
-  return <button onClick={handleClick}>削除</button>;
+  return <IconButton onClick={handleClick} ><DeleteIcon /></IconButton>;
 }
