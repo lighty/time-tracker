@@ -2,7 +2,17 @@ import React, { useState, useReducer } from "react";
 import numbering from './Numbering';
 import { saveProjects, loadProjects } from './Storage';
 
-const initialProjectState = {
+interface project {
+  id: number,
+  name: string,
+}
+
+interface projectState {
+  projects: project[];
+  message: string;
+}
+
+const initialProjectState: projectState = {
   projects: [
     { id: 1, name: 'reactの勉強' },
     { id: 2, name: 'typescriptの勉強' },
@@ -10,7 +20,7 @@ const initialProjectState = {
   message: '',
 };
 
-const init = (initialArg) => {
+const init = (initialArg: projectState): projectState => {
   const projects = loadProjects();
   if (projects) {
     return { projects: projects, message: '' };
@@ -19,7 +29,7 @@ const init = (initialArg) => {
   }
 }
 
-const reducer = (state, action) => {
+const reducer = (state: projectState, action: { type: string, name: string, id?: number } ) => {
   switch (action.type) {
     case 'addProject': {
       const newProject = state.projects.concat([{id: numbering(state.projects), name: action.name}]);
@@ -45,10 +55,10 @@ const reducer = (state, action) => {
 export default function Projects() {
   const [state, dispatch] = useReducer(reducer, initialProjectState, init);
 
-  const handleAddProject = (name) => {
-    dispatch({type: 'addProject', name})
+  const handleAddProject = (name: string) => {
+    dispatch({type: 'addProject', name, id: undefined })
   }
-  const handleDeleteProject = (id, name) => {
+  const handleDeleteProject = (id: number, name: string) => {
     dispatch({type: 'deleteProject', id, name})
   }
 
@@ -66,11 +76,11 @@ export default function Projects() {
   );
 }
 
-const AddForm = (props) => {
+const AddForm: React.FC<{onSubmit: Function}> = (props) => {
   const [value, setValue] = useState('')
 
-  const handleChange = (event) => setValue(event.target.value);
-  const handleSubmit = (event) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => setValue(event.target.value);
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     props.onSubmit(value);
     setValue('');
@@ -84,8 +94,8 @@ const AddForm = (props) => {
   );
 }
 
-const DeleteForm = (props) => {
-  const handleClick = (event) => {
+const DeleteForm: React.FC<{onClick: Function, project:project}> = (props) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     props.onClick(props.project.id, props.project.name);
   }
