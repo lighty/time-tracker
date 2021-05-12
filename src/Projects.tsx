@@ -1,6 +1,6 @@
-import React, { useState, useReducer } from "react";
+import React, { useReducer, useState } from "react";
 import numbering from './Numbering';
-import { saveProjects, loadProjects, project } from './Storage';
+import { loadProjects, project, saveProjects } from './Storage';
 
 export interface projectState {
   projects: project[];
@@ -24,10 +24,10 @@ const init = (initialArg: projectState): projectState => {
   }
 }
 
-const reducer = (state: projectState, action: { type: string, name: string, id?: number } ) => {
+const reducer = (state: projectState, action: { type: string, name: string, id?: number }) => {
   switch (action.type) {
     case 'addProject': {
-      const newProject = state.projects.concat([{id: numbering(state.projects), name: action.name}]);
+      const newProject = state.projects.concat([{ id: numbering(state.projects), name: action.name }]);
       saveProjects(newProject);
       return {
         projects: newProject,
@@ -47,31 +47,31 @@ const reducer = (state: projectState, action: { type: string, name: string, id?:
   }
 }
 
-export default function Projects() {
+export default function Projects(): JSX.Element {
   const [state, dispatch] = useReducer(reducer, initialProjectState, init);
 
   const handleAddProject = (name: string) => {
-    dispatch({type: 'addProject', name, id: undefined })
+    dispatch({ type: 'addProject', name, id: undefined })
   }
   const handleDeleteProject = (id: number, name: string) => {
-    dispatch({type: 'deleteProject', id, name})
+    dispatch({ type: 'deleteProject', id, name })
   }
 
   const project_components = state.projects.map((project) => {
-    return <li key={project.name}>{project.name} <DeleteForm onClick={handleDeleteProject} project={project}/></li>;
+    return <li key={project.name}>{project.name} <DeleteForm onClick={handleDeleteProject} project={project} /></li>;
   });
 
   return (
     <div>
       <h2>Projects</h2>
       <p>{state.message}</p>
-      <div><AddForm onSubmit={handleAddProject}/></div>
+      <div><AddForm onSubmit={handleAddProject} /></div>
       <ul>{project_components}</ul>
     </div>
   );
 }
 
-const AddForm: React.FC<{onSubmit: Function}> = (props) => {
+const AddForm: React.FC<{ onSubmit: Function }> = (props) => {
   const [value, setValue] = useState('')
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => setValue(event.target.value);
@@ -89,7 +89,7 @@ const AddForm: React.FC<{onSubmit: Function}> = (props) => {
   );
 }
 
-const DeleteForm: React.FC<{onClick: Function, project:project}> = (props) => {
+const DeleteForm: React.FC<{ onClick: Function, project: project }> = (props) => {
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     props.onClick(props.project.id, props.project.name);

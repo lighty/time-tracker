@@ -1,5 +1,5 @@
 interface numberingable {
-  id:number
+  id: number
 }
 
 export default function numbering(array: numberingable[]): number {
