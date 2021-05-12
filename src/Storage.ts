@@ -26,9 +26,9 @@ export const saveEntries = (entries: entry[]) => {
 export const loadEntries = (): entry[] => {
   const tasks: task[] = loadTasks();
   const entresJson = localStorage.getItem('entries');
-  const entries: entryInStorage[] = entresJson ? JSON.parse(entresJson) : [];
+  const entriesInStorage: entryInStorage[] = entresJson ? JSON.parse(entresJson) : [];
 
-  return entries.map(e => {
+  return entriesInStorage.map(e => {
     const id = e.id;
     const task = tasks.find(t => t.id === e.taskId);
     assert(task);
@@ -60,10 +60,10 @@ export const saveTasks = (tasks: task[]) => {
 
 export const loadTasks = (): task[] => {
   const tasksJson = localStorage.getItem('tasks');
-  const tasks: taskInStorage[] = tasksJson ? JSON.parse(tasksJson) : [];
+  const tasksInStorage: taskInStorage[] = tasksJson ? JSON.parse(tasksJson) : [];
   const projects = loadProjects();
 
-  return tasks.map(t => {
+  return tasksInStorage.map(t => {
     const project = projects.find(p => p.id === t.projectId);
     assert(project);
     return {
