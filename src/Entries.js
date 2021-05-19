@@ -133,9 +133,11 @@ const AddForm = (props) => {
     setTask(tasks[0]);
   }
 
+  const default_task_id = task === undefined ? '' : task.id;
+
   return (
     <form onSubmit={handleSubmit}>
-      <select onChange={handleTaskChange} value={task.id}>
+      <select onChange={handleTaskChange} value={default_task_id}>
         {taskOptions} 
       </select>
       <input type='submit' value='計測開始' />
