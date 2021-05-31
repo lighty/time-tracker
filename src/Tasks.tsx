@@ -1,12 +1,28 @@
 import React, { useState, useReducer } from "react";
 import numbering from './Numbering';
-import { saveTasks, loadTasks, loadProjects } from './Storage';
+import { saveTasks, loadTasks, loadProjects, task, project} from './Storage';
+
+export interface taskState {
+  tasks: task[];
+  message: string;
+}
 
 const init = () => {
   return { tasks: loadTasks(), message: '' };
 }
 
-const reducer = (state, action) => {
+type add_task_action  = {
+  type: 'addTask';
+  name: string;
+  project: project;
+};
+
+type delete_task_action = {
+  type: 'deleteTask';
+  name: string;
+  id: number;
+};
+const reducer = (state: taskState, action: add_task_action | delete_task_action ) => {
   switch(action.type) {
     case 'addTask': {
       const newTasks = state.tasks.concat([{id: numbering(state.tasks), name: action.name, project: action.project}]);
@@ -29,19 +45,19 @@ const reducer = (state, action) => {
   }
 }
 
-const Tasks = () => {
+const Tasks = (): JSX.Element => {
   const [state, dispatch] = useReducer(reducer, null, init);
-  const deleteTask = (id, name) => {
-    dispatch({type: 'deleteTask', id, name});
+  const deleteTask = (id: number, name: string) => {
+    dispatch({ type: 'deleteTask', id, name });
   };
-  const tasks = state.tasks.map(task => {
+  const tasks: JSX.Element[] = state.tasks.map(task => {
     return (
       <li key={task.id}>
         {task.name} [{task.project.name}] <DeleteForm onClick={deleteTask} id={task.id} name={task.name}/>
       </li>
     );
   });
-  const addTask = (name, project) => {
+  const addTask = (name: string, project: project) => {
     dispatch({type: 'addTask', name: name, project: project});
   }
   return (
@@ -54,7 +70,7 @@ const Tasks = () => {
   );
 }
 
-const AddForm = (props) => {
+const AddForm = (props: { onSubmit: (name: string, project: project) => void }) => {
   const [name, setName] = useState('');
   const projects = loadProjects();
   const [project, setProject] = useState(projects[0]);
@@ -62,11 +78,12 @@ const AddForm = (props) => {
     return <option value={project.id} key={project.id}>{project.name}</option>;
   });
 
-  const handleNameChange = e => setName(e.target.value);
-  const handleProjectChange = e => {
-    setProject(projects.find(p => p.id === parseInt(e.target.value)));
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value);
+  const handleProjectChange = (e: { target: { value: string; }; }) => {
+    const project = projects.find(p => p.id === parseInt(e.target.value));
+    if(project) { setProject(project); }
   };
-  const handleSubmit = e => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     props.onSubmit(name, project);
     setName('');
@@ -84,8 +101,8 @@ const AddForm = (props) => {
   );
 }
 
-const DeleteForm = (props) => {
-  const handleClick = (event) => {
+const DeleteForm = (props: { onClick: (id: number, name: string) => void; id: number; name: string; }): JSX.Element => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     props.onClick(props.id, props.name);
   }
